@@ -11,4 +11,4 @@ RUN go build -o build/traefik-acme .
 # Use a minimal image for the final container
 FROM scratch
 COPY --from=builder /app/build/traefik-acme /traefik-acme
-CMD ["./traefik-acme", "get"]
+CMD ["/traefik-acme", "get"]
