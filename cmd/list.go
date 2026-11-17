@@ -1,13 +1,13 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
+ *   Copyright (c) 2026 Andrey andrey4d.dev@gmail.com
+ *   All rights reserved.
+ */
 package cmd
 
 import (
 	"fmt"
-	"log/slog"
-	"os"
-	"traefik-acme/intetnal/resolver"
+
+	"traefik-acme/internal/resolver"
 
 	"github.com/spf13/cobra"
 )
@@ -16,21 +16,19 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List domains and certificates",
-	Run:   List,
+	RunE:  List,
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
-func List(cmd *cobra.Command, args []string) {
+func List(cmd *cobra.Command, args []string) error {
 	acmeFile, _ := rootCmd.PersistentFlags().GetString("input")
 	// Load the ACME configuration from a JSON file
 	certResolvers, err := resolver.Load(acmeFile)
 	if err != nil {
-
-		slog.Error("Error loading ACME configuration:", err)
-		os.Exit(1)
+		return fmt.Errorf("load acme file %q: %w", acmeFile, err)
 	}
 
 	for resolverName, r := range certResolvers {
@@ -41,4 +39,5 @@ func List(cmd *cobra.Command, args []string) {
 			fmt.Println("-> Domain:", crt.Domain)
 		}
 	}
+	return nil
 }

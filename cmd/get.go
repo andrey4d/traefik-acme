@@ -1,12 +1,14 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
+ *   Copyright (c) 2026 Andrey andrey4d.dev@gmail.com
+ *   All rights reserved.
+ */
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
-	"os"
-	"traefik-acme/intetnal/resolver"
+
+	"traefik-acme/internal/resolver"
 
 	"github.com/spf13/cobra"
 )
@@ -28,8 +30,7 @@ func Get(cmd *cobra.Command, args []string) error {
 	// Load the ACME configuration from a JSON file
 	certResolvers, err := resolver.Load(acmeFile)
 	if err != nil {
-		slog.Error("Error loading ACME configuration:", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("load acme file %q: %w", acmeFile, err)
 	}
 	path, _ := cmd.Flags().GetString("dir")
 
@@ -39,8 +40,7 @@ func Get(cmd *cobra.Command, args []string) error {
 			slog.Info("Certificate found", "domain", crt.Domain)
 
 			if err := resolver.Save(crt, path); err != nil {
-				slog.Error("Write file", "path", path)
-				return err
+				return fmt.Errorf("save certificate for %q: %w", crt.Domain, err)
 			}
 		}
 	}

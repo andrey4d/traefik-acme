@@ -85,20 +85,25 @@ func DecodeBase64(input string) ([]byte, error) {
 }
 
 func Save(domainCertificate DomainCert, path string) error {
+	// Create the output directory if it does not exist yet.
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		return fmt.Errorf("create output dir %q: %w", path, err)
+	}
 	filename := filepath.Join(path, domainCertificate.Domain)
 	certificate, err := DecodeBase64(domainCertificate.Certificate)
 	if err != nil {
-		return err
+		return fmt.Errorf("decode certificate for %s: %w", domainCertificate.Domain, err)
 	}
 	key, err := DecodeBase64(domainCertificate.Key)
 	if err != nil {
-		return err
+		return fmt.Errorf("decode private key for %s: %w", domainCertificate.Domain, err)
 	}
-	if err := os.WriteFile(filename+".crt", certificate, 0644); err != nil {
-		return err
+	if err := os.WriteFile(filename+".crt", certificate, 0o644); err != nil {
+		return fmt.Errorf("write certificate file %q: %w", filename+".crt", err)
 	}
-	if err := os.WriteFile(filename+".key", key, 0644); err != nil {
-		return err
+	// Private keys are written with owner-only permissions.
+	if err := os.WriteFile(filename+".key", key, 0o600); err != nil {
+		return fmt.Errorf("write private key file %q: %w", filename+".key", err)
 	}
 	return nil
 }
